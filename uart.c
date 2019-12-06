@@ -5,11 +5,11 @@
  *      Author: Alexandra Ferguson
  */
 
-char testdata = 'x';
 
 
 #include "msp.h"
 #include "uart.h"
+#include <String.h>
 
 // RX P3.2 -> TX
 // TX P3.3 -> RX
@@ -30,8 +30,8 @@ void init_UART(){
 
     while(EUSCI_A2->STATW & BIT0);
 
-   // EUSCI_A2->IE |= EUSCI_A_IE_RXIE | EUSCI_A_IE_STTIE | EUSCI_A_IE_TXIE;
-  //  NVIC_EnableIRQ(EUSCIA2_IRQn);
+    EUSCI_A2->IE |= EUSCI_A_IE_RXIE | EUSCI_A_IE_TXIE;
+    NVIC_EnableIRQ(EUSCIA2_IRQn);
 }
 
 void uart_clock_config() {
@@ -45,27 +45,27 @@ void uart_clock_config() {
 void send_char(uint8_t data) {
     while(EUSCI_A2->STATW & BIT0);
     EUSCI_A2->TXBUF = data;
-    //while(EUSCI_A2->STATW & BIT0);
+    int i;
+    for(i = 0; i < 1000000; i++);
 }
 
-
 char read_data() {
-    while(EUSCI_A2->STATW & BIT0);
     return EUSCI_A2->RXBUF;
-    //while(EUSCI_A2->STATW & BIT0);
 }
 
 void EUSCIA2_IRQHandler() {
-    uint32_t interrupt_cause = 0;
-    UCARXIFG
+    uint32_t interrupt_cause;
+    char testdata = 'q';
     interrupt_cause |= EUSCI_A2->IFG;
-    if(interrupt_cause & EUSCI_A_IFG_TXIFG)
+    if(EUSCI_A_IFG_TXIFG & interrupt_cause)
     {
-
-
+        EUSCI_A2->IFG &= ~(EUSCI_A_IFG_TXIFG);
+        send_char(testdata);
     }
-    else if(interrupt_cause & EUSCI_A_IFG_TXCPTIFG)
+    if(EUSCI_A_IFG_RXIFG & interrupt_cause)
     {
+        EUSCI_A2->IFG &= ~(EUSCI_A_IFG_TXIFG);
+        read_data();
 
     }
 }
