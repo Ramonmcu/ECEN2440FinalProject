@@ -1,3 +1,4 @@
+
 /*
  * uart.h
  *
@@ -8,6 +9,7 @@
 #ifndef UART_H_
 #define UART_H_
 
+int sent;
 
 void init_UART(void);
 void uart_clock_config(void);

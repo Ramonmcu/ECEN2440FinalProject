@@ -30,8 +30,8 @@ void init_UART(){
 
     while(EUSCI_A2->STATW & BIT0);
 
-    EUSCI_A2->IE |= EUSCI_A_IE_RXIE | EUSCI_A_IE_TXIE;
-    NVIC_EnableIRQ(EUSCIA2_IRQn);
+    //EUSCI_A2->IE |= EUSCI_A_IE_RXIE | EUSCI_A_IE_TXIE;
+   // NVIC_EnableIRQ(EUSCIA2_IRQn);
 }
 
 void uart_clock_config() {
@@ -45,6 +45,15 @@ void uart_clock_config() {
 void send_char(uint8_t data) {
     while(EUSCI_A2->STATW & BIT0);
     EUSCI_A2->TXBUF = data;
+    if(sent)
+    {
+        sent = 0;
+        NVIC_EnableIRQ(ADC14_IRQn);
+    }
+    else
+    {
+        sent++;
+    }
     int i;
     for(i = 0; i < 1000000; i++);
 }
@@ -60,15 +69,12 @@ void EUSCIA2_IRQHandler() {
     if(EUSCI_A_IFG_TXIFG & interrupt_cause)
     {
         EUSCI_A2->IFG &= ~(EUSCI_A_IFG_TXIFG);
-        send_char(testdata);
+       // send_char(testdata);
     }
     if(EUSCI_A_IFG_RXIFG & interrupt_cause)
     {
         EUSCI_A2->IFG &= ~(EUSCI_A_IFG_TXIFG);
-        read_data();
+       // read_data();
 
     }
 }
-
-
-

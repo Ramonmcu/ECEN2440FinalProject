@@ -5,16 +5,6 @@
  *      Author: rama1
  */
 
- /*
-     * Option 1: sample right after conversion is done
-     * ADC14->CTL0|=ADC14_CTL0_SHP;
-     * ADC14->CTL0|=ADC14_CTL0_MSC;
-     */
-
-    /*
-     * Option 2: wait for trigger to sample
-     * ADC14->CTL0|=ADC14_CTL0_SHP;
-     */
 
 #include "msp.h"
 #include "ADC_my.h"
@@ -84,12 +74,16 @@ void ADC14_IRQHandler(void)
        if(ADC14->MEM[0] != 16188)
        {
            hor_direction = 'R';
-           Schedule_event |= 0x01;
+           vert_direction = 'S';
+           Schedule_event |= 0b11;
+           NVIC_DisableIRQ(ADC14_IRQn);
        }
        else if(ADC14->MEM[1] != 16188)
        {
            vert_direction = 'F';
-           Schedule_event |= 0x10;
+           hor_direction = 'S';
+           Schedule_event |= 0b11;
+           NVIC_DisableIRQ(ADC14_IRQn);
        }
    }
    else if(interrupt_cause & ADC14_IFGR1_LOIFG)
@@ -98,23 +92,25 @@ void ADC14_IRQHandler(void)
        if(ADC14->MEM[0] != 16188)
        {
             hor_direction = 'L';
-            Schedule_event |= 0x01;
+            vert_direction = 'S';
+            Schedule_event |= 0b11;
+            NVIC_DisableIRQ(ADC14_IRQn);
        }
        else if(ADC14->MEM[1] != 16188)
        {
-            vert_direction = 'B';
-            Schedule_event |= 0x10;
+           vert_direction = 'B';
+           hor_direction = 'S';
+           Schedule_event |= 0b11;
+           NVIC_DisableIRQ(ADC14_IRQn);
        }
    }
-   else if(interrupt_cause & ADC14_IFGR0_IFG0)
+   else if(interrupt_cause & (ADC14_IFGR0_IFG0 |ADC14_IFGR0_IFG1))
    {
        hor_direction = 'S';
-       Schedule_event |= 0x01;
-   }
-   else if(interrupt_cause & ADC14_IFGR0_IFG1)
-   {
+       Schedule_event |= 0b01;
        vert_direction = 'S';
-       Schedule_event |= 0x10;
+       Schedule_event |= 0b10;
+       NVIC_DisableIRQ(ADC14_IRQn);
    }
 }
 
