@@ -54,8 +54,8 @@ void send_char(uint8_t data) {
     {
         sent++;
     }
-    int i;
-    for(i = 0; i < 1000000; i++);
+    //int i;
+    //for(i = 0; i < 1000000; i++);
 }
 
 char read_data() {

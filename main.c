@@ -12,7 +12,9 @@ void main(void) {
     Schedule_event =0;
     uart_clock_config();
     init_UART();
+    config_motor(50);
     Configure_ADC();
+
 
     while(1) {
 
